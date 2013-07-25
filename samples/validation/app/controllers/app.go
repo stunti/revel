@@ -7,5 +7,6 @@ type Application struct {
 }
 
 func (c Application) Index() revel.Result {
+	c.Layout = "layout.html"
 	return c.Render()
 }

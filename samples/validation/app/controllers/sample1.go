@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/robfig/revel"
 )
 
@@ -8,7 +9,13 @@ type Sample1 struct {
 	*revel.Controller
 }
 
+func (c *Sample1) Setup() revel.Result {
+	c.Layout = "layout.html"
+	return nil
+}
+
 func (c Sample1) Index() revel.Result {
+	fmt.Println("layout: ", c.Layout)
 	return c.Render()
 }
 
@@ -39,7 +46,7 @@ func (c Sample1) HandleSubmit(
 	if c.Validation.HasErrors() {
 		c.Validation.Keep()
 		c.FlashParams()
-		return c.Redirect(Sample1.Index)
+		return c.Redirect((*Sample1).Index)
 	}
 
 	// Ok, display the created user
