@@ -108,6 +108,7 @@ func (r PlaintextErrorResult) Apply(req *Request, resp *Response) {
 // Action methods return this result to request a template be rendered.
 type RenderTemplateResult struct {
 	Template   Template
+	Layout     Template
 	RenderArgs map[string]interface{}
 }
 
@@ -146,7 +147,25 @@ func (r *RenderTemplateResult) Apply(req *Request, resp *Response) {
 }
 
 func (r *RenderTemplateResult) render(req *Request, resp *Response, wr io.Writer) {
-	err := r.Template.Render(wr, r.RenderArgs)
+	var err error
+	if r.Layout != nil {
+		//render template first
+		var b bytes.Buffer
+		err = r.Template.Render(&b, r.RenderArgs)
+
+		if err == nil {
+
+			//assign result of template to the layout
+			r.RenderArgs["content"] = b.String()
+
+			//render layout
+			err = r.Layout.Render(wr, r.RenderArgs)
+		}
+
+	} else {
+		err = r.Template.Render(wr, r.RenderArgs)
+	}
+
 	if err == nil {
 		return
 	}

@@ -30,6 +30,8 @@ type Controller struct {
 	Args       map[string]interface{} // Per-request scratch space.
 	RenderArgs map[string]interface{} // Args passed to the template.
 	Validation *Validation            // Data validation helpers
+
+	Layout string //Layout script if needed
 }
 
 func NewController(req *Request, resp *Response) *Controller {
@@ -100,15 +102,21 @@ func (c *Controller) Render(extraRenderArgs ...interface{}) Result {
 // A less magical way to render a template.
 // Renders the given template, using the current RenderArgs.
 func (c *Controller) RenderTemplate(templatePath string) Result {
-
+	var layout Template
 	// Get the Template.
 	template, err := MainTemplateLoader.Template(templatePath)
 	if err != nil {
 		return c.RenderError(err)
 	}
 
+	if c.Layout != "" {
+		layout, err = MainTemplateLoader.Template(c.Layout)
+	}
+	//template.Layout = c.Layout
+
 	return &RenderTemplateResult{
 		Template:   template,
+		Layout:     layout,
 		RenderArgs: c.RenderArgs,
 	}
 }
